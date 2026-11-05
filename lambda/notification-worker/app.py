@@ -22,11 +22,16 @@ SQS_CLIENT = boto3.client("sqs", region_name=os.environ.get("AWS_REGION", "us-we
 
 def get_db_connection():
     """Create a database connection using environment variables."""
-    host = os.environ.get("DB_HOST", "localhost")
-    port = os.environ.get("DB_PORT", "5432")
-    dbname = os.environ.get("DB_NAME", "devopsdb")
-    user = os.environ.get("DB_USER", "devopsadmin")
-    password = os.environ.get("DB_PASSWORD", "password")
+
+    secretsClient = boto3.client('secretsmanager', region_name=os.environ.get("AWS_REGION", "us-west-2"))
+    secretsRaw = secretsClient.get_secret_value(SecretId='devops/rds-credentials')
+    secrets = json.loads(secretsRaw['SecretString'])
+
+    host = secrets["DB_HOST"]
+    port = secrets["DB_PORT"]
+    dbname = secrets["DB_NAME"]
+    user = secrets["DB_USER"]
+    password = secrets["DB_PASSWORD"]
 
     conn = psycopg2.connect(
         host=host,
