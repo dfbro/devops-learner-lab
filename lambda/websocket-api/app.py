@@ -43,8 +43,7 @@ SQS_CLIENT = boto3.client("sqs", region_name=os.environ.get("AWS_REGION", "us-we
 def get_db_connection():
     """Create a database connection using environment variables."""
 
-    secretsClient = boto3.client('secretsmanager', region_name=os.environ.get("AWS_REGION", "us-west-2"))
-    secretsRaw = secretsClient.get_secret_value(SecretId='devops/rds-credentials')
+    secretsRaw = boto3.client('secretsmanager').get_secret_value(SecretId='devops/rds-credentials')
     secrets = json.loads(secretsRaw['SecretString'])
 
     host = secrets["DB_HOST"]
