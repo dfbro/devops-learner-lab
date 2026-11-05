@@ -131,27 +131,30 @@ jobs:
             # Create zip of frontend
             cd frontend && zip -r ../frontend.zip . && cd ..
 
-            # Create S3 key for deployment
-            S3_KEY="deployments/${GITHUB_SHA::8}/frontend.zip"
-            BUCKET="${PREFIX}-assets-${ACCOUNT_ID}"
+            # # Create S3 key for deployment
+            # S3_KEY="deployments/${GITHUB_SHA::8}/frontend.zip"
+            # BUCKET="${PREFIX}-assets-${ACCOUNT_ID}"
 
-            # Upload to S3 and start deployment
-            aws s3 cp frontend.zip "s3://${BUCKET}/${S3_KEY}" --region ${AWS_REGION}
+            # # Upload to S3 and start deployment
+            # aws s3 cp frontend.zip "s3://${BUCKET}/${S3_KEY}" --region ${AWS_REGION}
 
-            DEPLOYMENT_ID=$(aws amplify create-deployment \
+            DEPLOYMENT_JSON=$(aws amplify create-deployment \
               --app-id ${APP_ID} \
               --branch-name main \
-              --region ${AWS_REGION} \
-              --query 'jobId' --output text)
+              --region ${AWS_REGION})
+
+            URL=$(echo $DEPLOYMENT_JSON | jq -r .zipUploadUrl)
+            JOB_ID=$(echo $DEPLOYMENT_JSON | jq -r .jobId)
+
+            curl -X PUT -T frontend.zip "$URL"
 
             aws amplify start-deployment \
               --app-id ${APP_ID} \
               --branch-name main \
-              --deployment-id ${DEPLOYMENT_ID} \
-              --source-url "s3://${BUCKET}/${S3_KEY}" \
+              --job-id ${JOB_ID} \
               --region ${AWS_REGION}
 
-            echo "Frontend deployment started: ${DEPLOYMENT_ID}"
+            echo "Frontend deployment started: ${JOB_ID}"
 
             # Cleanup
             rm -f frontend.zip
