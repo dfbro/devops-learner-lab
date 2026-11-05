@@ -1,2 +1,2 @@
 # devops-learner-lab
-LKS TC
+LKS TC 2026
