@@ -22,7 +22,7 @@ Features:
 import base64
 import json
 import os
-import uuid
+# import uuid
 from datetime import datetime, timezone
 
 import boto3
@@ -35,7 +35,7 @@ API_GW_CLIENT = boto3.client(
     endpoint_url=os.environ.get(
         "WEBSOCKET_ENDPOINT",
         "https://placeholder.execute-api.us-west-2.amazonaws.com/prod",
-    ),
+    ), region_name=os.environ.get("AWS_REGION", "us-west-2")
 )
 SQS_CLIENT = boto3.client("sqs", region_name=os.environ.get("AWS_REGION", "us-west-2"))
 
